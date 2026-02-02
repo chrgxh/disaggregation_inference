@@ -13,3 +13,6 @@ building_csvs/
 #models
 forecast_models/
 disaggregation_models/
+
+#training notebooks
+train_grus/
