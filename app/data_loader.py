@@ -3,7 +3,7 @@ import numpy as np
 from pathlib import Path
 from typing import Optional, Union
 
-def load_main_power_csv_as_is(
+def load_power_csv_as_is(
     device_id: str,
     csv_path: Union[str, Path],
     meter_num: int = 0,
