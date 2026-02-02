@@ -2,14 +2,19 @@ from fastapi import APIRouter, HTTPException, Request
 from app.utils.forecasting_core import forecast_next_day_baseline_from_csv
 from app.schemas import ForecastNextDayResponse
 
-router = APIRouter()
+router = APIRouter(tags=["forecasting"])
 
 
 @router.get(
     "/forecast/energy_consumption/day-ahead",
     response_model=ForecastNextDayResponse,
-    responses={404: {"description": "Building or appliance not found"}},
+    responses={
+        400: {"description": "Bad request (not enough history / feature mismatch / invalid data)"},
+        404: {"description": "Building or appliance not found"},
+        500: {"description": "Server misconfiguration (missing/invalid scaler bundle)"},
+    },
 )
+
 def forecast_next_day(request: Request, building: str, appliance: str):
     cache = request.app.state.forecast_models
     key = (str(building), str(appliance))
