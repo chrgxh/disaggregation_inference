@@ -3,6 +3,8 @@ import numpy as np
 from pathlib import Path
 from typing import Optional, Union
 
+#function to read from live database would be useful
+
 def load_power_csv_as_is(
     device_id: str,
     csv_path: Union[str, Path],

@@ -38,6 +38,7 @@ def disaggregate(
     rows_per_hour = acfg.rows_per_hour or bcfg.rows_per_hour
     max_mains_w = acfg.max_mains_w or bcfg.max_mains_w
 
+    #this could read from a live database
     df = load_power_csv_as_is(
         device_id=f"building_{building}",
         csv_path=str(bcfg.csv_path),
