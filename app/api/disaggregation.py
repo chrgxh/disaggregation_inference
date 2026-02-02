@@ -13,7 +13,7 @@ def disaggregate(
     request: Request,
     building: int = Query(..., ge=1, description="Building id as in config.yaml"),
     appliance: str = Query(..., min_length=1, description="Appliance key as in config.yaml"),
-    days_back: int = Query(1, ge=1, le=90, description="How many days back from latest timestamp in CSV"),
+    days_back: int = Query(1, ge=1, le=90, description="How many days back from latest timestamp"),
 ):
     cfg = request.app.state.cfg
 
@@ -32,7 +32,7 @@ def disaggregate(
 
     acfg = bcfg.appliances[appliance]
 
-    # 3) Load last N days from CSV
+    #Load last N days from CSV
     last_hours = int(days_back) * 24
 
     rows_per_hour = acfg.rows_per_hour or bcfg.rows_per_hour
@@ -51,7 +51,7 @@ def disaggregate(
     mains_w = df["power"].to_numpy(dtype=np.float32)
     ts = df["ts"].to_numpy()
 
-    # 4) Get cached models
+    # Get cached models
     key = (b_id, appliance)
     models = request.app.state.models.get(key)
     if models is None:
@@ -60,7 +60,6 @@ def disaggregate(
     clf = models["classifier"]
     reg = models["regressor"]
 
-    # 5) Run reconstruction (returns dataframe aligned to window centers)
     out_df, meta = reconstruct_from_mains(
         mains_w=mains_w,
         ts=ts,
@@ -72,8 +71,6 @@ def disaggregate(
         max_mains_w=max_mains_w,
     )
 
-    # 6) Return JSON (keep it manageable)
-    # If series is huge, you can downsample later.
     return {
         "building": building,
         "appliance": appliance,
