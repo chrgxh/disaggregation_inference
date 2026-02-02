@@ -1,1 +1,12 @@
 .venv
+__pycache__/
+
+#notebooks
+*.ipynb
+
+#data
+building_csvs/
+
+#models
+forecast_models/
+disaggregation_models/
