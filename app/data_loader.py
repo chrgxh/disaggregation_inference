@@ -1,22 +1,37 @@
 import pandas as pd
 import numpy as np
+from pathlib import Path
+from typing import Optional, Union
 
 def load_main_power_csv_as_is(
     device_id: str,
-    csv_path: str,
+    csv_path: Union[str, Path],
+    meter_num: int = 0,
     ts_col: str = "timestamp",
-    power_col: str = "power_data_main",
+    last_hours: Optional[int] = None,
+    rows_per_hour: int = 5000,
 ) -> pd.DataFrame:
-    df = pd.read_csv(csv_path)
-    if ts_col not in df.columns or power_col not in df.columns:
-        raise ValueError(f"CSV must contain columns: {ts_col}, {power_col}")
+    power_col = "power_data_main" if meter_num == 0 else f"power_data_meter_{meter_num}"
+
+    csv_path = Path(csv_path)
+
+    if last_hours is None:
+        df = pd.read_csv(csv_path, usecols=[ts_col, power_col])
+    else:
+        tail_rows = rows_per_hour * last_hours
+        df = pd.read_csv(csv_path, usecols=[ts_col, power_col]).tail(tail_rows)
 
     df["ts"] = pd.to_datetime(df[ts_col], utc=True, errors="coerce")
     df["power"] = pd.to_numeric(df[power_col], errors="coerce")
-    df = df.dropna(subset=["ts", "power"]).copy()
+    df = df.dropna(subset=["ts", "power"]).sort_values("ts").drop_duplicates("ts")
 
+    if last_hours is not None and not df.empty:
+        end = df["ts"].iloc[-1]
+        start = end - pd.Timedelta(hours=last_hours)
+        df = df[df["ts"] >= start]
+
+    df = df.reset_index(drop=True)
     df["device_id"] = device_id
-    df = df.sort_values("ts").drop_duplicates("ts").reset_index(drop=True)
     return df[["device_id", "ts", "power"]]
 
 def power_df_to_hourly_kwh_dt(
