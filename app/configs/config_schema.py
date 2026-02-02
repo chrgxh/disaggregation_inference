@@ -3,13 +3,14 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Dict, Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
+from pydantic import BaseModel, Field, validator, root_validator
 
 Unit = Literal["w", "kw"]
 
 
 class ApplianceConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    class Config:
+        extra = "forbid"
 
     window_size: int = Field(..., description="Must match training window size (odd integer).")
     clf_threshold: float = Field(0.5, ge=0.0, le=1.0)
@@ -23,15 +24,13 @@ class ApplianceConfig(BaseModel):
     rows_per_hour: Optional[int] = Field(None, gt=0)
     max_mains_w: Optional[float] = Field(None, gt=0)
 
-    @field_validator("window_size")
-    @classmethod
+    @validator("window_size")
     def window_size_must_be_positive_odd(cls, v: int) -> int:
         if v <= 0 or v % 2 == 0:
             raise ValueError("window_size must be a positive odd integer (e.g., 181, 301).")
         return v
 
-    @field_validator("classifier_path", "regressor_path")
-    @classmethod
+    @validator("classifier_path", "regressor_path")
     def model_paths_must_exist(cls, v: Path) -> Path:
         if not v.exists():
             raise ValueError(f"Model path does not exist: {v}")
@@ -39,7 +38,8 @@ class ApplianceConfig(BaseModel):
 
 
 class BuildingConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    class Config:
+        extra = "forbid"
 
     csv_path: Path
 
@@ -49,27 +49,81 @@ class BuildingConfig(BaseModel):
 
     appliances: Dict[str, ApplianceConfig]
 
-    @field_validator("csv_path")
-    @classmethod
+    @validator("csv_path")
     def csv_path_must_exist(cls, v: Path) -> Path:
         if not v.exists():
             raise ValueError(f"CSV path does not exist: {v}")
         return v
 
-    @model_validator(mode="after")
-    def ensure_appliances_non_empty(self) -> "BuildingConfig":
-        if not self.appliances:
+    @root_validator
+    def ensure_appliances_non_empty(cls, values):
+        appliances = values.get("appliances")
+        if not appliances:
             raise ValueError("Each building must define at least one appliance under 'appliances'.")
-        return self
+        return values
 
 
 class InferenceConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    class Config:
+        extra = "forbid"
 
     buildings: Dict[str, BuildingConfig]
 
-    @model_validator(mode="after")
-    def ensure_buildings_non_empty(self) -> "InferenceConfig":
-        if not self.buildings:
+    @root_validator
+    def ensure_buildings_non_empty(cls, values):
+        buildings = values.get("buildings")
+        if not buildings:
             raise ValueError("Config must define at least one building under 'buildings'.")
-        return self
+        return values
+
+
+class ForecastingApplianceConfig(BaseModel):
+    class Config:
+        extra = "forbid"
+
+    meter_num: int = Field(..., gt=0)
+
+    model_path: Path
+    scaler_path: Path
+    output_unit: Unit = "kw"
+
+    @validator("model_path", "scaler_path")
+    def paths_must_exist(cls, v: Path) -> Path:
+        if not v.exists():
+            raise ValueError(f"Path does not exist: {v}")
+        return v
+
+
+class ForecastingBuildingConfig(BaseModel):
+    class Config:
+        extra = "forbid"
+
+    csv_path: Path
+    appliances: Dict[str, ForecastingApplianceConfig]
+
+    @validator("csv_path")
+    def csv_path_must_exist(cls, v: Path) -> Path:
+        if not v.exists():
+            raise ValueError(f"CSV path does not exist: {v}")
+        return v
+
+    @root_validator
+    def ensure_appliances_non_empty(cls, values):
+        appliances = values.get("appliances")
+        if not appliances:
+            raise ValueError("Each building must define at least one appliance under 'appliances'.")
+        return values
+
+
+class ForecastingConfig(BaseModel):
+    class Config:
+        extra = "forbid"
+
+    buildings: Dict[str, ForecastingBuildingConfig]
+
+    @root_validator
+    def ensure_buildings_non_empty(cls, values):
+        buildings = values.get("buildings")
+        if not buildings:
+            raise ValueError("Config must define at least one building under 'buildings'.")
+        return values

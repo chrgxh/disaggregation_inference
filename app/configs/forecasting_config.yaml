@@ -1,0 +1,19 @@
+buildings:
+  "2":
+    csv_path: ../../building_csvs/combined_main_and_meters_2.csv
+
+    appliances:
+      main:
+        meter_num: 1
+        model_path: ../../forecast_models/main_2_gru.h5
+        scaler_path: ../../forecast_models/main_2_scalers_gru.pkl
+
+      # washing_machine:
+      #   meter_num: 2
+      #   model_path: ./forecast_models/b1_wm.h5
+      #   scaler_path: ./forecast_models/b1_wm_scaler.pkl
+
+      # dishwasher:
+      #   meter_num: 3
+      #   model_path: ./forecast_models/b1_dw.h5
+      #   scaler_path: ./forecast_models/b1_dw_scaler.pkl

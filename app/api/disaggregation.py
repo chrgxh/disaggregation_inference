@@ -3,12 +3,12 @@ import numpy as np
 import pandas as pd
 
 from app.utils.data_loader import load_power_csv_as_is
-from app.utils.inference_core import reconstruct_from_mains
+from app.utils.disaggregation_core import reconstruct_from_mains
 from app.schemas import DisaggregateResponse
 
 router = APIRouter(tags=["disaggregation"])
 
-@router.get("/disaggregate", response_model=DisaggregateResponse,responses={404: {"description": "Building or appliance not found"},})
+@router.get("/disaggregate", response_model=DisaggregateResponse,responses={404: {"description": "Building or appliance not found"}})
 def disaggregate(
     request: Request,
     building: int = Query(..., ge=1, description="Building id as in config.yaml"),
