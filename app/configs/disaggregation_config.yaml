@@ -1,0 +1,35 @@
+buildings:
+  "1":
+    csv_path: "./data/building_1_main.csv"
+    rows_per_hour: 5000
+    max_mains_w: 20000
+
+    appliances:
+      dish_washer:
+        window_size: 181
+        clf_threshold: 0.5
+        on_w: 50.0
+        classifier_path: "./models/dw_classifier.h5"
+        regressor_path: "./models/dw_regressor.h5"
+        regressor_output_unit: "kw"
+
+      washing_machine:
+        window_size: 301
+        clf_threshold: 0.5
+        on_w: 50.0
+        classifier_path: "./models/wm_classifier.h5"
+        regressor_path: "./models/wm_regressor.h5"
+        regressor_output_unit: "kw"
+
+  "2":
+    csv_path: "./data/building_2_main.csv"
+    rows_per_hour: 5000
+
+    appliances:
+      dish_washer:
+        window_size: 181
+        clf_threshold: 0.55
+        on_w: 50.0
+        classifier_path: "./models/dw_classifier.h5"
+        regressor_path: "./models/dw_regressor.h5"
+        regressor_output_unit: "kw"
