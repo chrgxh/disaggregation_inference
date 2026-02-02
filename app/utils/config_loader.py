@@ -4,7 +4,7 @@ from pathlib import Path
 import os
 import yaml
 
-from configs.config_schema import InferenceConfig
+from app.configs.config_schema import InferenceConfig
 
 
 def _resolve_path(p: str | Path, base_dir: Path) -> Path:

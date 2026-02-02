@@ -15,5 +15,7 @@ building_csvs/
 forecast_models/
 disaggregation_models/
 
+*.h5
+
 #training notebooks
 train_grus/
