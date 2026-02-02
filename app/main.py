@@ -6,7 +6,7 @@ from app.utils.config_loader import load_config, load_forecasting_config
 from app.api.disaggregation import router as disaggregation_router
 from app.api.forecasting import router as forecasting_router
 
-app = FastAPI(title="Disaggregation Inference API")
+app = FastAPI(title="Energy Analytics API")
 
 app.include_router(disaggregation_router)
 app.include_router(forecasting_router)

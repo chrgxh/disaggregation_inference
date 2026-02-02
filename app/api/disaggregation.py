@@ -8,7 +8,7 @@ from app.schemas import DisaggregateResponse
 
 router = APIRouter(tags=["disaggregation"])
 
-@router.get("/disaggregate", response_model=DisaggregateResponse,responses={404: {"description": "Building or appliance not found"}})
+@router.get("/disaggregate_power", response_model=DisaggregateResponse,responses={404: {"description": "Building or appliance not found"}})
 def disaggregate(
     request: Request,
     building: int = Query(..., ge=1, description="Building id as in config.yaml"),

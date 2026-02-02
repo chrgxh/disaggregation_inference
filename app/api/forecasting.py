@@ -6,7 +6,7 @@ router = APIRouter()
 
 
 @router.get(
-    "/forecast/next-day",
+    "/forecast/energy_consumption/day-ahead",
     response_model=ForecastNextDayResponse,
     responses={404: {"description": "Building or appliance not found"}},
 )
